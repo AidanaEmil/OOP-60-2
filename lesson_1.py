@@ -5,6 +5,7 @@ class Hero:
         self.hp = hp
 
 kirito = Hero('Kirito', 100, 1000)
+
 asuna = Hero('Asuna', 100, 1000)
 
 print(kirito.lvl)
