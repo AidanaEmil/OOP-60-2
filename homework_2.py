@@ -1,124 +1,76 @@
-from abc import ABC, abstractmethod
-
-
-# 1. Базовый класс Hero
-class Hero:
-    def __init__(self, name, lvl, hp):
+class Animal:
+    def __init__(self, name: str, age: int, health: int):
         self.name = name
-        self.lvl = lvl
-        self.hp = hp
+        self.age = age
+        self.health = health
 
-    def action(self):
-        return f"{self.name} готов к бою!"
+    def info(self) -> str:
+        return f"{self.name}, {self.age} лет, здоровье {self.health}"
 
+    def use_ability(self) -> str:
+        return f"{self.name} использует базовую способность."
 
-# 2. Дочерние классы
-class MageHero(Hero):
-    def __init__(self, name, lvl, hp, mp):
-        super().__init__(name, lvl, hp)
-        self.mp = mp
+class Flyable:
+    def use_ability(self) -> str:
+        base = super().use_ability()
+        return base + " летает."
 
-    def action(self):
-        return f"Маг {self.name} кастует заклинание! MP: {self.mp}"
+class Swimmable:
+    def use_ability(self) -> str:
+        base = super().use_ability()
+        return base + " плавает."
 
+class Invisible:
+    def use_ability(self) -> str:
+        base = super().use_ability()
+        return base + " становится невидимым."
 
-class WarriorHero(MageHero):
-    def __init__(self, name, lvl, hp, mp):
-        super().__init__(name, lvl, hp, mp)
+class Duck(Animal, Flyable, Swimmable):
+    pass
 
-    def action(self):
-        return f"Воин {self.name} рубит мечом! Уровень: {self.lvl}"
+class Bat(Animal, Flyable, Invisible):
+    pass
 
+class Frog(Animal, Swimmable):
+    pass
 
-# 3. Класс BankAccount (инкапсуляция, магия, классовые и статические методы)
-class BankAccount:
-    bank_name = "Simba"  # атрибут класса
+class Phoenix(Animal, Flyable, Invisible):
+    def reborn(self):
+        self.health = 200
+        return f"{self.name} возродился и теперь здоровье {self.health}"
 
-    def __init__(self, hero, balance, password):
-        self.hero = hero
-        self._balance = balance      # защищённый атрибут
-        self.__password = password   # приватный атрибут
+class Zoo:
+    def __init__(self):
+        self.animals = []
 
-    # Метод для входа
-    def login(self, password):
-        if password == self.__password:
-            return "Вход выполнен успешно!"
-        else:
-            return "Неверный пароль!"
+    def add_animal(self, animal: Animal):
+        self.animals.append(animal)
 
-    # Свойство (только для чтения)
-    @property
-    def full_info(self):
-        return f"{self.hero.name} | Баланс: {self._balance} SOM"
+    def show_all(self):
+        for a in self.animals:
+            print(a.info())
 
-    # Классовый метод
-    @classmethod
-    def get_bank_name(cls):
-        return f"Банк: {cls.bank_name}"
+    def perform_show(self):
+        for a in self.animals:
+            print(a.use_ability())
 
-    # Статический метод
-    @staticmethod
-    def bonus_for_level(lvl):
-        return f"Бонус за {lvl} уровень: {lvl * 10} SOM"
+if __name__ == "__main__":
+    zoo = Zoo()
 
-    # Магические методы
-    def __str__(self):
-        return f"{self.hero.name} | Баланс: {self._balance} SOM"
+    duck = Duck("Дональд", 3, 80)
+    bat = Bat("Бэтти", 5, 60)
+    frog = Frog("Кермит", 2, 50)
+    phoenix = Phoenix("Феникс", 100, 200)
 
-    def __add__(self, other):
-        if type(self.hero) == type(other.hero):
-            total = self._balance + other._balance
-            return f"Общий баланс: {total} SOM"
-        else:
-            return "Ошибка: нельзя объединять счета героев разных классов!"
+    for animal in (duck, bat, frog, phoenix):
+        zoo.add_animal(animal)
 
-    def __eq__(self, other):
-        return self.hero.name == other.hero.name and self.hero.lvl == other.hero.lvl
+    print("=== Информация о животных ===")
+    zoo.show_all()
 
+    print("\n=== Шоу суперспособностей ===")
+    zoo.perform_show()
 
-# 5. Абстрактный класс SmsService
-class SmsService(ABC):
-    @abstractmethod
-    def send_otp(self, phone):
-        pass
+    print("\nMRO для Duck:", Duck.__mro__)
+    print("MRO для Phoenix:", Phoenix.__mro__)
 
-
-# Классы для отправки СМС
-class KGSms(SmsService):
-    def send_otp(self, phone):
-        return f"<text>Код: 1234</text><phone>{phone}</phone>"
-
-
-class RUSms(SmsService):
-    def send_otp(self, phone):
-        return {"text": "Код: 1234", "phone": f"{phone}"}
-
-
-# === Проверка работы ===
-
-# Герои
-mage = MageHero("Merlin", 70, 200, 150)
-warrior = WarriorHero("Conan", 50, 500, 80)
-
-print(mage.action())      # Маг Merlin кастует заклинание! MP: 150
-print(warrior.action())   # Воин Conan рубит мечом! Уровень: 50
-
-# Банковские счета
-acc1 = BankAccount(mage, 5000, "1234")
-acc2 = BankAccount(warrior, 3000, "qwerty")
-
-print(acc1)   # Merlin | Баланс: 5000 SOM
-print(acc2)   # Conan | Баланс: 3000 SOM
-
-print(BankAccount.get_bank_name())  # Банк: Simba
-print(BankAccount.bonus_for_level(50))  # Бонус за 50 уровень: 500 SOM
-
-# Сложение балансов
-print(acc1 + acc2)  # Ошибка: нельзя объединять счета героев разных классов!
-
-# Сравнение героев
-print(acc1 == acc2)  # False
-
-# СМС
-sms = KGSms()
-print(sms.send_otp("+996777123456"))  # <text>Код: 1234</text><phone>+996777123456</phone>
